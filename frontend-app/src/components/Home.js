@@ -6,7 +6,7 @@ function Home() {
     <div>
       <header >
         <h1>Bienvenido a la Página Principal</h1>
-        <p>Esta es tu página de inicio</p>
+        <p>Esta es tu página de inicio, proximamente podrás ver tus listas</p>
       </header>
      
     </div>
