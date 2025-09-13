@@ -1,0 +1,30 @@
+# Dependencias locales
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+
+# Archivos de compilación de React (se regeneran en la build de Docker)
+build
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Configuración local/IDE
+.vscode
+.idea
+
+# Archivos temporales
+*.swp
+*.swo
+*.tmp
+
+# Dockerfile y docker-compose (ya no son necesarios dentro de la imagen)
+Dockerfile
+docker-compose*.yml
