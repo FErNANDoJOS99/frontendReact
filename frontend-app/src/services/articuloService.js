@@ -1,10 +1,9 @@
 // articuloService.js - Manejo de endpoints para la entidad Articulo
-
-const API_BASE_URL = 'http://localhost:8000/api';
+import { API_BASE_URL } from "../config/api.js";
 
 // Configuración base para las peticiones
 const defaultHeaders = {
-  'Content-Type': 'application/json',
+  "Content-Type": "application/json",
 };
 
 // Función auxiliar para manejar respuestas
@@ -18,7 +17,7 @@ const handleResponse = async (response) => {
 
 // Función auxiliar para manejar errores
 const handleError = (error) => {
-  console.error('Error en articuloService:', error);
+  console.error("Error en articuloService:", error);
   throw error;
 };
 
@@ -27,7 +26,7 @@ export const articuloService = {
   obtenerTodos: async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/articulos/`, {
-        method: 'GET',
+        method: "GET",
         headers: defaultHeaders,
       });
       return await handleResponse(response);
@@ -40,7 +39,7 @@ export const articuloService = {
   obtenerPorId: async (id) => {
     try {
       const response = await fetch(`${API_BASE_URL}/articulos/${id}/`, {
-        method: 'GET',
+        method: "GET",
         headers: defaultHeaders,
       });
       return await handleResponse(response);
@@ -53,7 +52,7 @@ export const articuloService = {
   crear: async (articulo) => {
     try {
       const response = await fetch(`${API_BASE_URL}/articulos/`, {
-        method: 'POST',
+        method: "POST",
         headers: defaultHeaders,
         body: JSON.stringify(articulo),
       });
@@ -67,7 +66,7 @@ export const articuloService = {
   actualizar: async (id, articulo) => {
     try {
       const response = await fetch(`${API_BASE_URL}/articulos/${id}/`, {
-        method: 'PUT',
+        method: "PUT",
         headers: defaultHeaders,
         body: JSON.stringify(articulo),
       });
@@ -81,7 +80,7 @@ export const articuloService = {
   actualizarParcial: async (id, datosActualizacion) => {
     try {
       const response = await fetch(`${API_BASE_URL}/articulos/${id}/`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: defaultHeaders,
         body: JSON.stringify(datosActualizacion),
       });
@@ -95,20 +94,20 @@ export const articuloService = {
   eliminar: async (id) => {
     try {
       const response = await fetch(`${API_BASE_URL}/articulos/${id}/`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: defaultHeaders,
       });
-      
+
       // DELETE puede retornar 204 No Content (sin cuerpo)
       if (response.status === 204) {
-        return { message: 'Artículo eliminado exitosamente' };
+        return { message: "Artículo eliminado exitosamente" };
       }
-      
+
       return await handleResponse(response);
     } catch (error) {
       handleError(error);
     }
-  }
+  },
 };
 
 export default articuloService;
