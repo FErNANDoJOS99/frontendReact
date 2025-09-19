@@ -1,10 +1,9 @@
 // usuarioService.js - Manejo de endpoints para la entidad Usuario
-
-const API_BASE_URL = 'http://localhost:8000/api';
+import { API_BASE_URL } from "../config/api.js";
 
 // Configuración base para las peticiones
 const defaultHeaders = {
-  'Content-Type': 'application/json',
+  "Content-Type": "application/json",
 };
 
 // Función auxiliar para manejar respuestas
@@ -18,7 +17,7 @@ const handleResponse = async (response) => {
 
 // Función auxiliar para manejar errores
 const handleError = (error) => {
-  console.error('Error en usuarioService:', error);
+  console.error("Error en usuarioService:", error);
   throw error;
 };
 
@@ -27,7 +26,7 @@ export const usuarioService = {
   obtenerTodos: async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/usuarios/`, {
-        method: 'GET',
+        method: "GET",
         headers: defaultHeaders,
       });
       return await handleResponse(response);
@@ -40,7 +39,7 @@ export const usuarioService = {
   obtenerPorId: async (id) => {
     try {
       const response = await fetch(`${API_BASE_URL}/usuarios/${id}/`, {
-        method: 'GET',
+        method: "GET",
         headers: defaultHeaders,
       });
       return await handleResponse(response);
@@ -53,7 +52,7 @@ export const usuarioService = {
   crear: async (usuario) => {
     try {
       const response = await fetch(`${API_BASE_URL}/usuarios/`, {
-        method: 'POST',
+        method: "POST",
         headers: defaultHeaders,
         body: JSON.stringify(usuario),
       });
@@ -67,7 +66,7 @@ export const usuarioService = {
   actualizar: async (id, usuario) => {
     try {
       const response = await fetch(`${API_BASE_URL}/usuarios/${id}/`, {
-        method: 'PUT',
+        method: "PUT",
         headers: defaultHeaders,
         body: JSON.stringify(usuario),
       });
@@ -81,7 +80,7 @@ export const usuarioService = {
   actualizarParcial: async (id, datosActualizacion) => {
     try {
       const response = await fetch(`${API_BASE_URL}/usuarios/${id}/`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: defaultHeaders,
         body: JSON.stringify(datosActualizacion),
       });
@@ -95,47 +94,47 @@ export const usuarioService = {
   eliminar: async (id) => {
     try {
       const response = await fetch(`${API_BASE_URL}/usuarios/${id}/`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: defaultHeaders,
       });
-      
+
       // DELETE puede retornar 204 No Content (sin cuerpo)
       if (response.status === 204) {
-        return { message: 'Usuario eliminado exitosamente' };
+        return { message: "Usuario eliminado exitosamente" };
       }
-      
+
       return await handleResponse(response);
     } catch (error) {
       handleError(error);
     }
   },
 
-  // Función para autenticar porque los del backedn no la hicieron 
+  // Función para autenticar porque los del backedn no la hicieron
   autenticar: async (nombre, password) => {
     try {
       // Obtener todos los usuarios y buscar coincidencia
       const usuarios = await usuarioService.obtenerTodos();
-      const usuario = usuarios.find(u => 
-        u.nombre === nombre && u.password === password
+      const usuario = usuarios.find(
+        (u) => u.nombre === nombre && u.password === password
       );
-      
+
       if (usuario) {
         return {
           success: true,
           usuario: usuario,
-          message: 'Autenticación exitosa'
+          message: "Autenticación exitosa",
         };
       } else {
         return {
           success: false,
           usuario: null,
-          message: 'Credenciales incorrectas'
+          message: "Credenciales incorrectas",
         };
       }
     } catch (error) {
       handleError(error);
     }
-  }
+  },
 };
 
 export default usuarioService;

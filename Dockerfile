@@ -1,38 +1,37 @@
-# React Frontend Dockerfile
-FROM node:18-alpine
+# Stage build
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Install pm2 globally
-RUN npm install -g pm2
-
-# Copy package files
 COPY frontend-app/package*.json ./
 
-# Install dependencies
 RUN npm ci
 
-# Copy source code
 COPY frontend-app/ ./
 
-# Build the React app
 RUN npm run build
 
-# Install serve to serve the built app
-RUN npm install -g serve
+FROM node:18-alpine AS runtime
 
-# Create non-root user
+WORKDIR /app
+
+COPY --from=builder /app/build /app/build
+
+COPY frontend-app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+RUN npm install -g pm2 serve
+
+RUN apk add --no-cache supervisor
+
 RUN addgroup -S appuser && \
     adduser -D -S -G appuser appuser
 
-# Change ownership to appuser
 RUN chown -R appuser:appuser /app
 
-# Switch to non-root user
+RUN mkdir -p /app/supervisor /app/dist && chown -R appuser:appuser /app/supervisor /app/dist /app
+
 USER appuser
 
-# Expose port 3000
 EXPOSE 3000
 
-# Use pm2 to serve the built React app
-CMD ["pm2-runtime", "start", "npx", "--", "serve", "-s", "build", "-l", "3000"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
