@@ -1,37 +1,39 @@
-# Stage build
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
 COPY frontend-app/package*.json ./
-
 RUN npm ci
 
 COPY frontend-app/ ./
-
 RUN npm run build
 
+# ------------------------------
+# Stage 2: Runtime
+# ------------------------------
 FROM node:18-alpine AS runtime
 
 WORKDIR /app
 
-COPY --from=builder /app/build /app/build
+# Copiar build estático
+COPY --from=builder /app/build ./build
 
-COPY frontend-app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Copiar script
+COPY inject-config.sh /app/inject-config.sh
+RUN chmod +x /app/inject-config.sh
 
-RUN npm install -g pm2 serve
+# Crear usuario no-root
+RUN addgroup -S appuser && adduser -S -G appuser appuser
 
-RUN apk add --no-cache supervisor
+# Dar permisos reales al usuario
+RUN chown -R appuser:appuser /app/build
 
-RUN addgroup -S appuser && \
-    adduser -D -S -G appuser appuser
-
-RUN chown -R appuser:appuser /app
-
-RUN mkdir -p /app/supervisor /app/dist && chown -R appuser:appuser /app/supervisor /app/dist /app
+RUN npm install -g serve
 
 USER appuser
 
 EXPOSE 3000
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+ENV REACT_APP_API_BASE_URL="http://localhost:8000/api"
+
+CMD ["/bin/sh", "-c", "/app/inject-config.sh && serve -s build -l 3000"]
