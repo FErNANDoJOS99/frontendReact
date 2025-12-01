@@ -1,0 +1,97 @@
+name: Build and Publish Frontend App
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with: 
+        node-version : '20'
+
+    - name: Install dependencies
+      run: npm install
+      working-directory: ./frontend-app
+
+    - name: Run unit tests
+      run: npm test -- --watchAll=false --verbose
+      working-directory: ./frontend-app
+
+
+    - name: Run installation tests
+      run: CI=false npm run build
+      working-directory: ./frontend-app
+
+
+      
+  build-and-push:
+    name: Build and Push Docker Image Frontend app
+    needs : test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'table'
+        exit-code: '1'
+        severity: 'CRITICAL,HIGH'
+
+          # 1. Configurar credenciales de AWS
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Extract version
+      id: vars
+      run: echo "VERSION=1.0.${{ github.run_number }}" >> $GITHUB_ENV
+
+     # 3. Construir y subir la imagen
+    - name: Build, tag, and push image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: mi-app-repo-front
+        #IMAGE_TAG: latest
+      run: |
+        docker build -t $ECR_REPOSITORY:${{ env.VERSION }} .
+        docker tag $ECR_REPOSITORY:${{ env.VERSION }} $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION }}
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION }}
+
+    - name: Print Image URI
+      run: echo "IMAGE URI:${{ steps.login-ecr.outputs.registry }}/mi-app-repo:${{ env.VERSION }}"    
+  
+
+
