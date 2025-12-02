@@ -131,7 +131,7 @@ jobs:
           docker pull "$ECR_REGISTRY/$ECR_REPO:$VERSION"
 
           echo "Starting container..."
-          docker run -d --name mi-app-repo-front -p 80:80 "$ECR_REGISTRY/$ECR_REPO:$VERSION"
+          docker run -d --name mi-app-repo-front -p 3000:3000 "$ECR_REGISTRY/$ECR_REPO:$VERSION"
 
           echo "Deployment complete."
 
