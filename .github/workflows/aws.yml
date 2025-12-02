@@ -93,5 +93,45 @@ jobs:
     - name: Print Image URI
       run: echo "IMAGE URI:${{ steps.login-ecr.outputs.registry }}/mi-app-repo:${{ env.VERSION }}"    
   
+      # ---------------- DEPLOY ----------------
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        debug: true
 
+        script: |
+          VERSION="${{ env.VERSION }}"
+          ECR_REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+          ECR_REPO="mi-app-repo-front"
+
+          echo "Deploying version $VERSION"
+
+          if [ -z "$VERSION" ] || [ -z "$ECR_REGISTRY" ]; then
+            echo "ERROR: VERSION o ECR_REGISTRY vacío"
+            exit 1
+          fi
+
+          echo "Logging into ECR..."
+          aws ecr get-login-password --region us-east-1 | docker login \
+            --username AWS --password-stdin "$ECR_REGISTRY"
+
+          echo "Stopping old container..."
+          docker stop mi-app-repo-front || true
+          docker rm mi-app-repo-front || true
+
+          echo "Cleaning old images..."
+          docker images --format "{{.Repository}}:{{.Tag}}" \
+            | grep "^$ECR_REGISTRY" \
+            | xargs -r docker rmi || true
+
+          echo "Pulling new image..."
+          docker pull "$ECR_REGISTRY/$ECR_REPO:$VERSION"
+
+          echo "Starting container..."
+          docker run -d --name mi-app-repo-front -p 80:80 "$ECR_REGISTRY/$ECR_REPO:$VERSION"
+
+          echo "Deployment complete."
 
