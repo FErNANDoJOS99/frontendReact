@@ -86,8 +86,12 @@ jobs:
         ECR_REPOSITORY: mi-app-repo-front
         REACT_APP_API_BASE_URL: http://98.89.167.146:8000/api
         #IMAGE_TAG: latest
+        # docker build -t $ECR_REPOSITORY:${{ env.VERSION }} . 
       run: |
-        docker build -t $ECR_REPOSITORY:${{ env.VERSION }} .
+        docker build \
+        --build-arg REACT_APP_API_BASE_URL=http://98.89.167.146:8000/api \
+        -t $ECR_REPOSITORY:${{ env.VERSION }} .
+
         docker tag $ECR_REPOSITORY:${{ env.VERSION }} $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION }}
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION }}
 
