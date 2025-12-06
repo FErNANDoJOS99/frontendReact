@@ -3,6 +3,11 @@ import { usuarioService } from '../usuarioService';
 // Mock de fetch
 global.fetch = jest.fn();
 
+// Base URL desde variable de entorno (con fallback para tests)
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL ;
+  //process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+
 describe('usuarioService', () => {
   beforeEach(() => {
     fetch.mockClear();
@@ -23,7 +28,7 @@ describe('usuarioService', () => {
       const usuarios = await usuarioService.obtenerTodos();
 
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/api/usuarios/',
+        `${API_BASE_URL}/usuarios/`,
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -39,7 +44,8 @@ describe('usuarioService', () => {
         text: async () => 'Internal Server Error',
       });
 
-      await expect(usuarioService.obtenerTodos()).rejects.toThrow('HTTP 500: Internal Server Error');
+      await expect(usuarioService.obtenerTodos())
+        .rejects.toThrow('HTTP 500: Internal Server Error');
     });
   });
 
@@ -55,7 +61,7 @@ describe('usuarioService', () => {
       const usuario = await usuarioService.obtenerPorId(1);
 
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/api/usuarios/1/',
+        `${API_BASE_URL}/usuarios/1/`,
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -78,7 +84,7 @@ describe('usuarioService', () => {
       const resultado = await usuarioService.crear(nuevoUsuario);
 
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/api/usuarios/',
+        `${API_BASE_URL}/usuarios/`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -148,7 +154,7 @@ describe('usuarioService', () => {
       const resultado = await usuarioService.eliminar(1);
 
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/api/usuarios/1/',
+        `${API_BASE_URL}/usuarios/1/`,
         {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
@@ -171,7 +177,7 @@ describe('usuarioService', () => {
       const resultado = await usuarioService.actualizar(1, datosActualizacion);
 
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/api/usuarios/1/',
+        `${API_BASE_URL}/usuarios/1/`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
