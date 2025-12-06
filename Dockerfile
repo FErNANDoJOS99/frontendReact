@@ -32,6 +32,9 @@ RUN mkdir -p /app/supervisor /app/dist && chown -R appuser:appuser /app/supervis
 
 USER appuser
 
+ARG REACT_APP_API_BASE_URL
+ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
+
 EXPOSE 3000
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
