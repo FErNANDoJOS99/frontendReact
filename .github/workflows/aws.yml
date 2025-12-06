@@ -84,6 +84,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: mi-app-repo-front
+        REACT_APP_API_BASE_URL: http://98.89.167.146:8000/api
         #IMAGE_TAG: latest
       run: |
         docker build -t $ECR_REPOSITORY:${{ env.VERSION }} .
@@ -131,7 +132,7 @@ jobs:
           docker pull "$ECR_REGISTRY/$ECR_REPO:$VERSION"
 
           echo "Starting container..."
-          docker run -d --name mi-app-repo-front --env REACT_APP_API_BASE_URL="http://98.89.167.146:8000"  -p 3000:3000 "$ECR_REGISTRY/$ECR_REPO:$VERSION"
+          docker run -d --name mi-app-repo-front -p 3000:3000 "$ECR_REGISTRY/$ECR_REPO:$VERSION"
 
           echo "Deployment complete."
 
