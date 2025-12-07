@@ -8,7 +8,7 @@ const API_BASE_URL =
 
 // Descomentar si quiero variables reactivas despues del build
 // const API_BASE_URL =
-//   window._env_?.REACT_APP_API_BASE_URL || "http://localhost:8000/api";
+//   window._env_?.REACT_APP_API_BASE_URL || "http://localhost:8000/borradaapi";
 
 export { API_BASE_URL };
 export default API_BASE_URL;
