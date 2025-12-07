@@ -3,6 +3,9 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+ARG REACT_APP_API_BASE_URL
+ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
+
 COPY frontend-app/package*.json ./
 
 RUN npm ci
@@ -32,8 +35,7 @@ RUN mkdir -p /app/supervisor /app/dist && chown -R appuser:appuser /app/supervis
 
 USER appuser
 
-ARG REACT_APP_API_BASE_URL
-ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
+
 
 EXPOSE 3000
 
